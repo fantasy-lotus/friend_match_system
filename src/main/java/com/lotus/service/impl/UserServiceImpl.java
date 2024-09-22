@@ -151,7 +151,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
     }
 
     @Override
-    public Boolean isAdmin(User user) {
+    public boolean isAdmin(User user) {
         // 如果user为空，抛出异常
         if(user == null)
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"目标为空");
@@ -160,7 +160,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
     }
 
     @Override
-    public Boolean isAdmin(HttpServletRequest request) {
+    public boolean isAdmin(HttpServletRequest request) {
         // 从session中获取用户
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute(UserConstant.USER_LOGIN_STATE);

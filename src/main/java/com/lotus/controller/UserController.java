@@ -81,8 +81,6 @@ public class UserController {
     /**
      *
      * @param user - 前端不允许传密码字段
-     * @param request
-     * @return
      */
     @PostMapping("/update")
     public BaseResult<Boolean> userUpdate(@RequestBody User user, HttpServletRequest request) {
@@ -99,7 +97,7 @@ public class UserController {
         return ResultUtils.success(b);
     }
 
-    @GetMapping("/searchUsersByTags")
+    @GetMapping("/search/byTags")
     public BaseResult<List<User>> getUsersByTags(@RequestParam List<String> tagsNameList) {
         if(tagsNameList==null|| tagsNameList.isEmpty()){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");

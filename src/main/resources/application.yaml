@@ -1,5 +1,10 @@
 server:
   port: 8080
+  servlet:
+    session:
+      cookie:
+        domain: localhost
+    context-path: /api #默认访问前缀
 
 spring:
   datasource:
