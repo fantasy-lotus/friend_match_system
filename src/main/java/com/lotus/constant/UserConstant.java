@@ -1,7 +1,8 @@
 package com.lotus.constant;
 
-import io.swagger.models.auth.In;
-
+/**
+ * 常量类
+ */
 public class UserConstant {
     public static final String USER_LOGIN_STATE = "userLoginState";
 

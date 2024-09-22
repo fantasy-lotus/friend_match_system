@@ -158,24 +158,4 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         }
         return Objects.equals(user.getRole(), UserConstant.ADMIN_ROLE);
     }
-//    @Override
-//    public User getUserById(int id) {
-//        return userMapper.getUserById(id);
-//    }
-//
-//    @Override
-//    public User getUserByTel(String tel) {
-//        return userMapper.getUserByTel(tel);
-//    }
-//
-//    @Override
-//    public User getAllUsers() {
-//        return userMapper.getAllUsers();
-//    }
-//
-//    @Override
-//    public Boolean addUser(User user) {
-//        return userMapper.addUser(user) != 0;
-//    }
-
 }

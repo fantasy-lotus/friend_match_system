@@ -1,7 +1,5 @@
 package com.lotus.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.lotus.common.BaseResult;
 import com.lotus.common.BusinessException;
 import com.lotus.common.ErrorCode;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/user")

@@ -26,8 +26,8 @@ public class SwaggerConfiguration {
     @Bean(value = "defaultApi2")
     public Docket defaultApi2() {
         String groupName="2.X版本";
-        Docket docket=new Docket(DocumentationType.SWAGGER_2)
-                .host("https://www.baidu.com")
+        return new Docket(DocumentationType.SWAGGER_2)
+                .host("https://github.com/fantasy-lotus")
                 .apiInfo(apiInfo())
                 .groupName(groupName)
                 .select()
@@ -35,15 +35,14 @@ public class SwaggerConfiguration {
                 .paths(PathSelectors.any())
                 .build()
                 .extensions(openApiExtensionResolver.buildExtensions(groupName));
-        return docket;
     }
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 //.title("swagger-bootstrap-ui-demo RESTful APIs")
                 .description("# swagger-bootstrap-ui-demo RESTful APIs")
-                .termsOfServiceUrl("http://www.xx.com/")
-                .contact("xx@qq.com")
+                .termsOfServiceUrl("https://github.com/fantasy-lotus")
+                .contact("gilgamesh258@qq.com")
                 .version("1.0")
                 .build();
     }

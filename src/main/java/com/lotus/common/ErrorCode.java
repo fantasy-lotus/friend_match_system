@@ -1,8 +1,10 @@
 package com.lotus.common;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @AllArgsConstructor
 public enum ErrorCode {
     PARAMS_ERROR(40000,"请求参数错误",""),
@@ -13,17 +15,5 @@ public enum ErrorCode {
     STORE_ERROR(50001,"存储错误","");
     private final int code;
     private final String msg;
-    private final String Description;
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return Description;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
+    private final String description;
 }

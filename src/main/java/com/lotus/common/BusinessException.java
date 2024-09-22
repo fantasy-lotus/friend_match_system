@@ -1,8 +1,8 @@
 package com.lotus.common;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class BusinessException extends RuntimeException {
 
     private final int code;
