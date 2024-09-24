@@ -1,5 +1,6 @@
 package com.lotus.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lotus.common.BaseResult;
 import com.lotus.common.BusinessException;
 import com.lotus.common.ErrorCode;
@@ -105,4 +106,21 @@ public class UserController {
         List<User> tags = userService.getUsersByTags(tagsNameList);
         return ResultUtils.success(tags);
     }
+
+    @GetMapping("/recommend")
+    public BaseResult<List<User>> recommendUsers(HttpServletRequest request) {
+        if(request==null){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+        if(request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        //todo 分页展示
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.ne("uid",userService.getCurrentUser(request).getUid());
+        List<User> recommendUsers = userService.list(queryWrapper);
+        recommendUsers.forEach(user -> user.setPwd(null));
+        return ResultUtils.success(recommendUsers);
+    }
+
 }
