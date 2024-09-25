@@ -1,6 +1,8 @@
 package com.lotus.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lotus.common.BaseResult;
 import com.lotus.common.BusinessException;
 import com.lotus.common.ErrorCode;
@@ -46,8 +48,8 @@ public class UserController {
         if (userLoginRequest == null || request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        if(request.getSession().getAttribute(USER_LOGIN_STATE) != null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请先退出登录");
+        if (request.getSession().getAttribute(USER_LOGIN_STATE) != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请先退出登录");
         }
         String tel = userLoginRequest.getTel();
         String pwd = userLoginRequest.getPwd();
@@ -66,9 +68,10 @@ public class UserController {
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return ResultUtils.success(true);
     }
+
     @GetMapping("/currentUser")
     public BaseResult<User> getCurrentUser(HttpServletRequest request) {
-        if(request==null){
+        if (request == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
         User currentUser = userService.getCurrentUser(request);
@@ -80,19 +83,18 @@ public class UserController {
     }
 
     /**
-     *
      * @param user - 前端不允许传密码字段
      */
     @PostMapping("/update")
     public BaseResult<Boolean> userUpdate(@RequestBody User user, HttpServletRequest request) {
-        if(user == null||request == null) {
+        if (user == null || request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        if(request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
+        if (request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
-        if(user.getPwd()!=null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求非法");
+        if (user.getPwd() != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求非法");
         }
         Boolean b = userService.updateUser(user, request);
         return ResultUtils.success(b);
@@ -100,27 +102,26 @@ public class UserController {
 
     @GetMapping("/search/byTags")
     public BaseResult<List<User>> getUsersByTags(@RequestParam List<String> tagsNameList) {
-        if(tagsNameList==null|| tagsNameList.isEmpty()){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        if (tagsNameList == null || tagsNameList.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         List<User> tags = userService.getUsersByTags(tagsNameList);
         return ResultUtils.success(tags);
     }
 
     @GetMapping("/recommend")
-    public BaseResult<List<User>> recommendUsers(HttpServletRequest request) {
-        if(request==null){
+    public BaseResult<List<User>> recommendUsers(long pageNum, int pageSize, HttpServletRequest request) {
+        if (request == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
-        if(request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
+        if (request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
-        //todo 分页展示
+        Page<User> userPage = new Page<>(pageNum, pageSize);
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.ne("uid",userService.getCurrentUser(request).getUid());
-        List<User> recommendUsers = userService.list(queryWrapper);
-        recommendUsers.forEach(user -> user.setPwd(null));
-        return ResultUtils.success(recommendUsers);
+        queryWrapper.ne("uid", userService.getCurrentUser(request).getUid());
+        IPage<User> userIPage = userService.page(userPage, queryWrapper);
+        return ResultUtils.success(userIPage.getRecords());
     }
 
 }
