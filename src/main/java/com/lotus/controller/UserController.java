@@ -7,6 +7,7 @@ import com.lotus.common.BaseResult;
 import com.lotus.common.BusinessException;
 import com.lotus.common.ErrorCode;
 import com.lotus.common.ResultUtils;
+import com.lotus.constant.UserConstant;
 import com.lotus.pojo.User;
 import com.lotus.pojo.UserLoginRequest;
 import com.lotus.pojo.UserRegisterRequest;
@@ -14,10 +15,14 @@ import com.lotus.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 
 @RestController
 @RequestMapping("/user")
@@ -25,8 +30,10 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class UserController {
     @Autowired
-    UserService userService;
-    private static final String USER_LOGIN_STATE = "userLoginState";
+    private UserService userService;
+
+    @Autowired
+    private RedisTemplate<String,Object> redisTemplate;
 
     @PostMapping("/register")
     public BaseResult<Boolean> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
@@ -48,7 +55,7 @@ public class UserController {
         if (userLoginRequest == null || request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        if (request.getSession().getAttribute(USER_LOGIN_STATE) != null) {
+        if (request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE) != null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请先退出登录");
         }
         String tel = userLoginRequest.getTel();
@@ -65,7 +72,7 @@ public class UserController {
         if (request == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
-        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
         return ResultUtils.success(true);
     }
 
@@ -90,7 +97,7 @@ public class UserController {
         if (user == null || request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        if (request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
+        if (request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE) == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
         if (user.getPwd() != null) {
@@ -109,19 +116,35 @@ public class UserController {
         return ResultUtils.success(tags);
     }
 
+    /**
+     * 采用缓存的思想, 不过有点bug
+     * @param pageNum
+     * @param pageSize
+     * @param request
+     * @return
+     */
     @GetMapping("/recommend")
     public BaseResult<List<User>> recommendUsers(long pageNum, int pageSize, HttpServletRequest request) {
         if (request == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
-        if (request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
+        if (request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE) == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
-        Page<User> userPage = new Page<>(pageNum, pageSize);
+        String key = String.format("lotus_match:user:recommend:%s", userService.getCurrentUser(request).getUid());
+        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
+        IPage<User> userPage = (IPage<User>) operations.get(key);
+        if( userPage != null){
+            return ResultUtils.success(userPage.getRecords());
+        }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.ne("uid", userService.getCurrentUser(request).getUid());
-        IPage<User> userIPage = userService.page(userPage, queryWrapper);
-        return ResultUtils.success(userIPage.getRecords());
+        userPage = userService.page(new Page<>(pageNum,pageSize), queryWrapper);
+        operations.set(key,userPage,10, TimeUnit.SECONDS);
+        if (userPage == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        return ResultUtils.success(userPage.getRecords());
     }
 
 }
