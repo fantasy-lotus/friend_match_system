@@ -3,17 +3,17 @@ package com.lotus.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lotus.common.BaseResult;
-import com.lotus.common.BusinessException;
-import com.lotus.common.ErrorCode;
-import com.lotus.common.ResultUtils;
+import com.lotus.common.*;
 import com.lotus.constant.UserConstant;
 import com.lotus.pojo.User;
 import com.lotus.pojo.UserLoginRequest;
 import com.lotus.pojo.UserRegisterRequest;
 import com.lotus.service.UserService;
+import io.lettuce.core.RedisClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -32,8 +32,10 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+//    @Autowired
+//    private RedisTemplate<String,Object> redisTemplate;
     @Autowired
-    private RedisTemplate<String,Object> redisTemplate;
+    private RedissonClient redissonClient;
 
     @PostMapping("/register")
     public BaseResult<Boolean> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
@@ -132,18 +134,18 @@ public class UserController {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
         String key = String.format("lotus_match:user:recommend:%s", userService.getCurrentUser(request).getUid());
-        ValueOperations<String, Object> operations = redisTemplate.opsForValue();
-        IPage<User> userPage = (IPage<User>) operations.get(key);
+        RBucket<Object> bucket = redissonClient.getBucket(key);
+        IPage<User> userPage = (IPage<User>)bucket.get();
         if( userPage != null){
             return ResultUtils.success(userPage.getRecords());
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.ne("uid", userService.getCurrentUser(request).getUid());
         userPage = userService.page(new Page<>(pageNum,pageSize), queryWrapper);
-        operations.set(key,userPage,10, TimeUnit.SECONDS);
         if (userPage == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR);
         }
+        bucket.set(userPage,10,TimeUnit.SECONDS);
         return ResultUtils.success(userPage.getRecords());
     }
 

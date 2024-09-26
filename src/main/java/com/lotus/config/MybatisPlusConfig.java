@@ -1,4 +1,4 @@
-package com.lotus.common;
+package com.lotus.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;

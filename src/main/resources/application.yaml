@@ -6,6 +6,7 @@ server:
         domain: localhost
     context-path: /api #默认访问前缀
 
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -15,6 +16,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
   application:
     name: lotus_match
+
   session:
     timeout: 43200
     store-type: redis
@@ -31,3 +33,7 @@ mybatis-plus:
 
 knife4j:
   enable: true
+
+server_profile:
+  ip: 127.0.0.1
+  port: 8080

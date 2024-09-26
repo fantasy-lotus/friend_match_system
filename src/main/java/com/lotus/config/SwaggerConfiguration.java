@@ -1,4 +1,4 @@
-package com.lotus.common;
+package com.lotus.config;
 
 import com.github.xiaoymin.knife4j.spring.extension.OpenApiExtensionResolver;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -14,9 +14,9 @@ public class GlobalExceptionHandler {
         log.error(e.getMessage());
         return ResultUtils.error(e.getCode(),e.getMessage(),e.getDescription());
     }
-
-    @ExceptionHandler(RuntimeException.class)
-    public void runtime(RuntimeException e) {
+    //其他异常
+    @ExceptionHandler(Exception.class)
+    public void exception(Exception e) {
         log.error(e.getMessage(), e);
     }
 }
