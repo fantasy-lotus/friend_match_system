@@ -21,6 +21,7 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Objects;
 
+
 @Service
 @NoArgsConstructor
 @Slf4j
@@ -84,9 +85,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         if (user == null)
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号或密码错误");
         user.setPwd(null);
-        HttpSession session = req.getSession();
-        session.setAttribute(UserConstant.USER_LOGIN_STATE, user);
-        log.info(session.getAttribute(UserConstant.USER_LOGIN_STATE).toString());
+        req.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
         return user;
     }
 
@@ -115,14 +114,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
     public User getCurrentUser(HttpServletRequest req) {
         // 如果req为空，抛出异常
         if(req == null)
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"1");
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
         // 从session中获取用户
-        User user = (User) req.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        Object attribute = req.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
         // 如果用户为空，抛出异常
-        if(user == null)
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"2");
+        if(attribute == null)
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
         // 将密码设置为空
-        user.setPwd(null);
+        User user = (User) attribute;
         // 返回用户
         return user;
     }
