@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.spi.service.contexts.Defaults;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -36,6 +37,8 @@ public class UserController {
 //    private RedisTemplate<String,Object> redisTemplate;
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    private Defaults defaults;
 
     @PostMapping("/register")
     public BaseResult<Boolean> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
@@ -69,7 +72,7 @@ public class UserController {
         return ResultUtils.success(res);
     }
 
-    @PostMapping("/logout")
+    @GetMapping("/logout")
     public BaseResult<Boolean> userLogout(HttpServletRequest request) {
         if (request == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
@@ -78,7 +81,7 @@ public class UserController {
         return ResultUtils.success(true);
     }
 
-    @GetMapping("/currentUser")
+    @GetMapping("/current")
     public BaseResult<User> getCurrentUser(HttpServletRequest request) {
         if (request == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
@@ -126,12 +129,12 @@ public class UserController {
      * @return
      */
     @GetMapping("/recommend")
-    public BaseResult<List<User>> recommendUsers(long pageNum, int pageSize, HttpServletRequest request) {
-        if (request == null) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
-        }
+    public BaseResult<List<User>> recommendUsers(@RequestParam(name = "pageNum",defaultValue = "1") long pageNum,@RequestParam(name = "pageSize",defaultValue = "8") long pageSize, HttpServletRequest request) {
         if (request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE) == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        if(pageNum <= 0 || pageSize <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数不合法");
         }
         String key = String.format("lotus_match:user:recommend:%s", userService.getCurrentUser(request).getUid());
         RBucket<Object> bucket = redissonClient.getBucket(key);

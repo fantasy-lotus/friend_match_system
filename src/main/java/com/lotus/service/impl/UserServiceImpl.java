@@ -86,6 +86,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         user.setPwd(null);
         HttpSession session = req.getSession();
         session.setAttribute(UserConstant.USER_LOGIN_STATE, user);
+        log.info(session.getAttribute(UserConstant.USER_LOGIN_STATE).toString());
         return user;
     }
 
@@ -114,12 +115,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
     public User getCurrentUser(HttpServletRequest req) {
         // 如果req为空，抛出异常
         if(req == null)
-            throw new BusinessException(ErrorCode.NOT_LOGIN);
+            throw new BusinessException(ErrorCode.NOT_LOGIN,"1");
         // 从session中获取用户
         User user = (User) req.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
         // 如果用户为空，抛出异常
         if(user == null)
-            throw new BusinessException(ErrorCode.NOT_LOGIN);
+            throw new BusinessException(ErrorCode.NOT_LOGIN,"2");
         // 将密码设置为空
         user.setPwd(null);
         // 返回用户

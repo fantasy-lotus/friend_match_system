@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://8.148.22.124:3306/match_lotus?characterEncoding=utf8&useSSL=false
+    username: lotus
+    password: "0721"
+    type: com.alibaba.druid.pool.DruidDataSource
